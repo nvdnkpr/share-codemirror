@@ -35,6 +35,22 @@
       check();
     });
 
+    var marker;
+    cm.on('cursorActivity', function (doc) {
+      if (suppress) return;
+
+      var startCur = doc.getCursor('start');
+      //var endCur = doc.getCursor('end');
+
+      var from = startCur;
+      var to = {line: startCur.line, ch: startCur.ch+1};
+
+      // TODO: can't display it at end of line. Might need to use from==to and style marker?
+      var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
+      if(marker) marker.clear();
+      marker = doc.markText(from, to, opts);
+    });
+
     // Convert a CodeMirror change into an op understood by share.js
     function applyToShareJS(cm, change) {
       // CodeMirror changes give a text replacement.
