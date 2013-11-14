@@ -1,7 +1,12 @@
 (function () {
   'use strict';
 
-  function shareCodeMirror(cm, ctx) {
+  /**
+   * @param cm - CodeMirror instance
+   * @param ctx - Share context
+   * @param bcs - BrowserChannel socket (for cursor)
+   */
+  function shareCodeMirror(cm, ctx, bcs) {
     if (!ctx.provides.text) throw new Error('Cannot attach to non-text document');
 
     var suppress = false;
@@ -49,6 +54,9 @@
       var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
       if(marker) marker.clear();
       marker = doc.markText(from, to, opts);
+      if(bcs) {
+        bcs.send({_type: 'cursor', from: from, to: to, docId: ctx._doc.name});
+      }
     });
 
     // Convert a CodeMirror change into an op understood by share.js
@@ -116,9 +124,9 @@
       });
     } else {
       // Browser, no AMD
-      window.sharejs.Doc.prototype.attachCodeMirror = function(cm, ctx) {
+      window.sharejs.Doc.prototype.attachCodeMirror = function(cm, ctx, bcs) {
         if(!ctx) ctx = this.createContext();
-        shareCodeMirror(cm, ctx);
+        shareCodeMirror(cm, ctx, bcs);
       };
     }
   }

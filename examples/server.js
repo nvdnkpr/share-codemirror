@@ -32,7 +32,13 @@ webserver.use(browserChannel({webserver: webserver}, function (client) {
   stream.headers = client.headers;
   stream.remoteAddress = stream.address;
   client.on('message', function (data) {
-    stream.push(data);
+    if(data._type) {
+      // It's not for sharejs
+      //console.log(data);
+      //client.send({_type: 'scursor'});
+    } else {
+      stream.push(data);
+    }
   });
   stream.on('error', function (msg) {
     client.stop();

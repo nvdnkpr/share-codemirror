@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/codemirror.css">
     <style>
         .otherPerson {
-            width: 40px;
+            width: 2px;
             background: red;
         }
     </style>
@@ -22,15 +22,50 @@ var cm = CodeMirror.fromTextArea(elem, {
   mode: "text/plain"
 });
 
-var s = new BCSocket(null, {reconnect: true});
-var sjs = new window.sharejs.Connection(s);
+var bcs = new BCSocket(null, {reconnect: true});
+function SocketFacade(bcs) {
+  var self = this;
+
+  bcs.onopen = function() {
+    console.log('onopen', arguments);
+    self.onopen();
+  };
+
+  bcs.onmessage = function(msg) {
+    console.log('onmessage', arguments);
+    self.onmessage(msg);
+  };
+
+  bcs.onerror = function() {
+    console.log('onerror', arguments);
+    self.onerror();
+  };
+
+  bcs.onclose = function() {
+    console.log('onclose', arguments);
+    self.onclose();
+  };
+  
+  this.send = function(msg) {
+    console.log('send', arguments);
+    bcs.send(msg);
+  };
+
+  this.__defineGetter__('readyState', function() {
+    return bcs.readyState;
+  });
+}
+var sf = new SocketFacade(bcs);
+var sjs = new window.sharejs.Connection(sf);
+console.log(sf);
+
 var doc = sjs.get('users', 'sephx');
 
 doc.subscribe();
 doc.whenReady(function () {
   if (!doc.type) doc.create('text');
   if (doc.type && doc.type.name === 'text') {
-    doc.attachCodeMirror(cm);
+    doc.attachCodeMirror(cm, null, bcs);
   }
 });
 
