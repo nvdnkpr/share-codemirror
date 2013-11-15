@@ -27,27 +27,33 @@ function SocketFacade(bcs) {
   var self = this;
 
   bcs.onopen = function() {
-    console.log('onopen', arguments);
     self.onopen();
   };
 
   bcs.onmessage = function(msg) {
-    console.log('onmessage', arguments);
-    self.onmessage(msg);
+    if(msg._type) {
+      var handlerName = 'on_' + msg._type;
+      var handler = self[handlerName];
+      if(typeof handler === 'function') {
+        handler.call(self, msg);
+      } else {
+        console.log('No handler: ' + handlerName);
+      }
+    } else {
+      // Deliver in the usual way
+      self.onmessage(msg);
+    }
   };
 
   bcs.onerror = function() {
-    console.log('onerror', arguments);
     self.onerror();
   };
 
   bcs.onclose = function() {
-    console.log('onclose', arguments);
     self.onclose();
   };
   
   this.send = function(msg) {
-    console.log('send', arguments);
     bcs.send(msg);
   };
 
@@ -57,7 +63,6 @@ function SocketFacade(bcs) {
 }
 var sf = new SocketFacade(bcs);
 var sjs = new window.sharejs.Connection(sf);
-console.log(sf);
 
 var doc = sjs.get('users', 'sephx');
 
@@ -65,7 +70,7 @@ doc.subscribe();
 doc.whenReady(function () {
   if (!doc.type) doc.create('text');
   if (doc.type && doc.type.name === 'text') {
-    doc.attachCodeMirror(cm, null, bcs);
+    doc.attachCodeMirror(cm, null, sf);
   }
 });
 

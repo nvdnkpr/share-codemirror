@@ -34,8 +34,9 @@ webserver.use(browserChannel({webserver: webserver}, function (client) {
   client.on('message', function (data) {
     if(data._type) {
       // It's not for sharejs
-      //console.log(data);
-      //client.send({_type: 'scursor'});
+      // Just send it back to the client
+      // TODO: Send to all clients of the same doc
+      client.send(data);
     } else {
       stream.push(data);
     }

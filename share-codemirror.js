@@ -59,6 +59,10 @@
       }
     });
 
+    bcs.on_cursor = function(msg) {
+      console.log("Someone's cursor", msg);
+    };
+
     // Convert a CodeMirror change into an op understood by share.js
     function applyToShareJS(cm, change) {
       // CodeMirror changes give a text replacement.
