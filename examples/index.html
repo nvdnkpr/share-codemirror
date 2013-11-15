@@ -11,7 +11,9 @@
 <script src="/codemirror.js"></script>
 <script src="/channel/bcsocket.js"></script>
 <script src="/share.uncompressed.js"></script>
+<script src="/dispatch-socket.js"></script>
 <script src="/share-codemirror.js"></script>
+<script src="/share-codemirror-cursor.js"></script>
 </head>
 <body>
 <textarea id="pad">Connecting...</textarea>
@@ -23,46 +25,11 @@ var cm = CodeMirror.fromTextArea(elem, {
 });
 
 var bcs = new BCSocket(null, {reconnect: true});
-function SocketFacade(bcs) {
-  var self = this;
+var ds = new DispatchSocket(bcs);
+//console.log(cm);
+shareCodeMirrorCursor(cm, ds);
 
-  bcs.onopen = function() {
-    self.onopen();
-  };
-
-  bcs.onmessage = function(msg) {
-    if(msg._type) {
-      var handlerName = 'on_' + msg._type;
-      var handler = self[handlerName];
-      if(typeof handler === 'function') {
-        handler.call(self, msg);
-      } else {
-        console.log('No handler: ' + handlerName);
-      }
-    } else {
-      // Deliver in the usual way
-      self.onmessage(msg);
-    }
-  };
-
-  bcs.onerror = function() {
-    self.onerror();
-  };
-
-  bcs.onclose = function() {
-    self.onclose();
-  };
-  
-  this.send = function(msg) {
-    bcs.send(msg);
-  };
-
-  this.__defineGetter__('readyState', function() {
-    return bcs.readyState;
-  });
-}
-var sf = new SocketFacade(bcs);
-var sjs = new window.sharejs.Connection(sf);
+var sjs = new window.sharejs.Connection(ds);
 
 var doc = sjs.get('users', 'sephx');
 
@@ -70,7 +37,7 @@ doc.subscribe();
 doc.whenReady(function () {
   if (!doc.type) doc.create('text');
   if (doc.type && doc.type.name === 'text') {
-    doc.attachCodeMirror(cm, null, sf);
+    doc.attachCodeMirror(cm, null);
   }
 });
 

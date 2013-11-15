@@ -4,9 +4,8 @@
   /**
    * @param cm - CodeMirror instance
    * @param ctx - Share context
-   * @param bcs - BrowserChannel socket (for cursor)
    */
-  function shareCodeMirror(cm, ctx, bcs) {
+  function shareCodeMirror(cm, ctx) {
     if (!ctx.provides.text) throw new Error('Cannot attach to non-text document');
 
     var suppress = false;
@@ -39,30 +38,6 @@
       applyToShareJS(cm, change);
       check();
     });
-
-    cm.on('cursorActivity', function (doc) {
-      if (suppress) return;
-
-      var startCur = doc.getCursor('start');
-      //var endCur = doc.getCursor('end');
-
-      var from = startCur;
-      var to = {line: startCur.line, ch: startCur.ch+1};
-
-      if(bcs) {
-        bcs.send({_type: 'cursor', from: from, to: to, docId: ctx._doc.name});
-      }
-    });
-
-    if(bcs) {
-      var marker;
-      bcs.on_cursor = function(msg) {
-        if(marker) marker.clear();
-        // TODO: can't display it at end of line. Might need to use from==to and style marker?
-        var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
-        marker = cm.markText(msg.from, msg.to, opts);
-      };
-    }
 
     // Convert a CodeMirror change into an op understood by share.js
     function applyToShareJS(cm, change) {
@@ -123,14 +98,14 @@
     module.exports.scriptsDir = __dirname;
   } else {
     if (typeof define === 'function' && define.amd) {
-      // Require.js & co
+      // AMD
       define([], function () {
         return shareCodeMirror;
       });
     } else {
       // Browser, no AMD
-      window.sharejs.Doc.prototype.attachCodeMirror = function(cm, ctx, bcs) {
-        if(!ctx) ctx = this.createContext();
+      window.sharejs.Doc.prototype.attachCodeMirror = function (cm, ctx, bcs) {
+        if (!ctx) ctx = this.createContext();
         shareCodeMirror(cm, ctx, bcs);
       };
     }
