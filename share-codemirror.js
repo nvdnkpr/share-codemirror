@@ -40,7 +40,6 @@
       check();
     });
 
-    var marker;
     cm.on('cursorActivity', function (doc) {
       if (suppress) return;
 
@@ -50,17 +49,17 @@
       var from = startCur;
       var to = {line: startCur.line, ch: startCur.ch+1};
 
-      // TODO: can't display it at end of line. Might need to use from==to and style marker?
-      var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
-      if(marker) marker.clear();
-      marker = doc.markText(from, to, opts);
       if(bcs) {
         bcs.send({_type: 'cursor', from: from, to: to, docId: ctx._doc.name});
       }
     });
 
+    var marker;
     bcs.on_cursor = function(msg) {
-      console.log("Someone's cursor", msg);
+      if(marker) marker.clear();
+      // TODO: can't display it at end of line. Might need to use from==to and style marker?
+      var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
+      marker = cm.markText(msg.from, msg.to, opts);
     };
 
     // Convert a CodeMirror change into an op understood by share.js
