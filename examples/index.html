@@ -26,7 +26,6 @@ var cm = CodeMirror.fromTextArea(elem, {
 
 var bcs = new BCSocket(null, {reconnect: true});
 var ds = new DispatchSocket(bcs);
-//console.log(cm);
 shareCodeMirrorCursor(cm, ds);
 
 var sjs = new window.sharejs.Connection(ds);
@@ -37,7 +36,7 @@ doc.subscribe();
 doc.whenReady(function () {
   if (!doc.type) doc.create('text');
   if (doc.type && doc.type.name === 'text') {
-    doc.attachCodeMirror(cm, null);
+    doc.attachCodeMirror(cm);
   }
 });
 

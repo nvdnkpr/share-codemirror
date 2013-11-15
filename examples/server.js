@@ -19,7 +19,12 @@ var backend = livedb.client(livedbMongo('localhost:27017/test?auto_reconnect', {
 
 var share = sharejs.server.createClient({backend: backend});
 
+var clientsById = {};
+
 webserver.use(browserChannel({webserver: webserver}, function (client) {
+  console.log('CONNECT', client.id);
+  clientsById[client.id] = client;
+
   var stream = new Duplex({objectMode: true});
   stream._write = function (chunk, encoding, callback) {
     if (client.state !== 'closed') {
@@ -36,18 +41,31 @@ webserver.use(browserChannel({webserver: webserver}, function (client) {
       // It's not for sharejs
       // Just send it back to the client
       // TODO: Send to all clients of the same doc
-      client.send(data);
+      clients.forEach(function (c) {
+        c.send(data);
+      });
     } else {
+      console.log(data);
+      
+      if(data.a == 'sub') {
+        var docId = data.d;
+        var collectionName = data.c;
+        // Client client.id is subbing to docId inside collectionName
+      }
+      
       stream.push(data);
     }
   });
   stream.on('error', function (msg) {
+    console.log('ERROR', msg, client.id);
     client.stop();
   });
   client.on('close', function (reason) {
+    console.log('CLOSE', reason, client.id);
     stream.emit('close');
     stream.emit('end');
     stream.end();
+    delete clientsById[client.id];
   });
   return share.listen(stream);
 }));

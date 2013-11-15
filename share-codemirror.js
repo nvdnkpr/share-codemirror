@@ -104,9 +104,9 @@
       });
     } else {
       // Browser, no AMD
-      window.sharejs.Doc.prototype.attachCodeMirror = function (cm, ctx, bcs) {
+      window.sharejs.Doc.prototype.attachCodeMirror = function (cm, ctx) {
         if (!ctx) ctx = this.createContext();
-        shareCodeMirror(cm, ctx, bcs);
+        shareCodeMirror(cm, ctx);
       };
     }
   }
