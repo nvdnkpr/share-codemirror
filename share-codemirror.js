@@ -54,13 +54,15 @@
       }
     });
 
-    var marker;
-    bcs.on_cursor = function(msg) {
-      if(marker) marker.clear();
-      // TODO: can't display it at end of line. Might need to use from==to and style marker?
-      var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
-      marker = cm.markText(msg.from, msg.to, opts);
-    };
+    if(bcs) {
+      var marker;
+      bcs.on_cursor = function(msg) {
+        if(marker) marker.clear();
+        // TODO: can't display it at end of line. Might need to use from==to and style marker?
+        var opts = {inclusiveLeft: true, inclusiveRight: true, className: 'otherPerson'};
+        marker = cm.markText(msg.from, msg.to, opts);
+      };
+    }
 
     // Convert a CodeMirror change into an op understood by share.js
     function applyToShareJS(cm, change) {
