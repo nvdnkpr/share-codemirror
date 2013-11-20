@@ -26,7 +26,7 @@ var cm = CodeMirror.fromTextArea(elem, {
 
 var bcs = new BCSocket(null, {reconnect: true});
 var ds = new DispatchSocket(bcs);
-shareCodeMirrorCursor(cm, ds);
+shareCodeMirrorCursor(cm, ds); // TODO: cm.attachSharedCursors(ds);
 
 var sjs = new window.sharejs.Connection(ds);
 
