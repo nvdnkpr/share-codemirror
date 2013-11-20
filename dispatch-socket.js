@@ -2,11 +2,18 @@
   'use strict';
 
   /**
-   * Creates a new DispatchSocket. By default this creates a drop-in replacement for a WebSocket or BCSocket.
+   * A DispatchSocket is a drop-in replacement for a BCSocket or WebSocket with some additional capabilities.
    *
    * Incoming messages can be dispatched to custom event handlers by assigning `on_xxx` event handlers.
    * This causes incoming messages with a `_type: 'xxx'` attribute to be routed to that handler instead of
    * the default `onmessage` handler.
+   *
+   * This makes it possible to use a single connection as a transport for different kinds of messages.
+   * For example, ShareJS messages will be routed as usual, but messages with a `_type` attribute will
+   * be routed to other event handlers so that it doesn't interfere.
+   *
+   * In order for this to work for outgoing messages, a similar dispatch mechanism will have to be implemented
+   * on the server.
    *
    * @param {WebSocket} ws - a WebSocket or BCSocket object.
    * @constructor

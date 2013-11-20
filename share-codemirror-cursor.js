@@ -16,6 +16,7 @@
 
     if (ds) {
       var marker;
+      // DispatchSocket message
       ds.on_cursor = function (msg) {
         if (marker) marker.clear();
         // TODO: can't display it at end of line. Might need to use from==to and style marker?
