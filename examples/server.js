@@ -41,6 +41,7 @@ webserver.use(browserChannel({webserver: webserver}, function (client) {
       // It's not for sharejs
       // Just send it back to the client
       // TODO: Send to all clients of the same doc
+      // TODO: explore redis pubsub for this
       clients.forEach(function (c) {
         c.send(data);
       });
